@@ -1,0 +1,742 @@
+========================================================
+COMPLETE MERN STACK DEPLOYMENT ON VM
+(UBUNTU + NGINX + PM2)
+========================================================
+
+PROJECT NAME:
+Student-management
+
+GITHUB REPOSITORY:
+https://github.com/Pratham-ghadge/Student-management.git
+
+
+========================================================
+STEP 1 — CREATE VIRTUAL MACHINE
+========================================================
+
+Create Ubuntu 22.04 VM
+
+Recommended:
+Ubuntu Server 22.04 LTS
+
+While creating VM enable:
+
+[✓] Public IP Address
+
+Open Inbound Ports:
+
+Port 22   → SSH
+Port 80   → HTTP
+Port 443  → HTTPS (Optional)
+Port 5000 → Optional (Only for backend testing)
+
+Download your PEM key file
+
+Example:
+
+vm_key.pem
+
+
+========================================================
+STEP 2 — CONNECT TO VM
+========================================================
+
+--------------------------------------------------------
+OPTION 1 — CONNECT USING PEM KEY
+--------------------------------------------------------
+
+Move pem file into your local project folder
+
+Give permission:
+
+chmod 400 vm_key.pem
+
+
+Connect to VM:
+
+ssh -i vm_key.pem azureuser@YOUR_VM_IP
+
+
+Example:
+
+ssh -i vm_key.pem azureuser@20.244.10.100
+
+
+--------------------------------------------------------
+OPTION 2 — CONNECT USING USERNAME & PASSWORD
+--------------------------------------------------------
+
+Connect:
+
+ssh username@YOUR_VM_IP
+
+
+Example:
+
+ssh azureuser@20.244.10.100
+
+
+Then enter password
+
+
+========================================================
+STEP 3 — UPDATE SERVER
+========================================================
+
+Run:
+
+sudo apt update
+
+sudo apt upgrade -y
+
+
+========================================================
+STEP 4 — INSTALL LATEST NODE.JS
+========================================================
+
+Install latest Node.js:
+
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+
+sudo apt install -y nodejs
+
+
+Check versions:
+
+node -v
+
+npm -v
+
+
+========================================================
+STEP 5 — INSTALL REQUIRED SOFTWARE
+========================================================
+
+Install Git and Nginx:
+
+sudo apt install -y git nginx
+
+
+Install PM2 globally:
+
+sudo npm install -g pm2
+
+
+Check versions:
+
+git --version
+
+nginx -v
+
+pm2 -v
+
+
+========================================================
+STEP 6 — CLONE YOUR GITHUB PROJECT
+========================================================
+
+Go to home folder:
+
+cd ~
+
+
+Clone project:
+
+git clone https://github.com/Pratham-ghadge/Student-management.git
+
+
+Go inside the project folder:
+
+cd Student-management
+
+
+========================================================
+STEP 7 — BACKEND SETUP
+========================================================
+
+Go to backend folder:
+
+cd backend
+
+
+Install dependencies:
+
+npm install
+
+
+Optional:
+
+If you get an error while running npm install, use one of these commands:
+
+npm install --legacy-peer-deps
+
+OR
+
+npm install --force
+
+
+========================================================
+CHECK BACKEND PORT
+========================================================
+
+Make sure your backend is running on port 5000.
+
+Example in server.js:
+
+app.listen(5000)
+
+OR
+
+server.listen(5000)
+
+
+========================================================
+OPEN BACKEND .ENV FILE
+========================================================
+
+Open env file:
+
+nano .env
+
+
+Change this:
+
+CLIENT_URL=http://localhost:5173
+
+
+To this:
+
+CLIENT_URL=http://YOUR_VM_IP
+
+
+Example:
+
+CLIENT_URL=http://20.244.10.100
+
+
+IMPORTANT:
+DO NOT ADD PORT NUMBER
+
+
+Save and Exit:
+
+CTRL + X
+Press Y
+Press ENTER
+
+
+========================================================
+TEST BACKEND
+========================================================
+
+Run backend:
+
+npm run dev
+
+
+If the backend starts successfully, stop it:
+
+CTRL + C
+
+
+========================================================
+START BACKEND USING PM2
+========================================================
+
+IMPORTANT:
+
+server.js is your backend main starting file.
+
+If your backend main file is:
+- server.js
+- app.js
+- index.js
+
+then use that file name.
+
+
+Example:
+
+pm2 start server.js --name backend
+
+
+Here:
+- server.js → backend main file
+- backend → PM2 process name
+
+
+Check PM2 status:
+
+pm2 status
+
+
+View logs:
+
+pm2 logs
+
+OR
+
+pm2 logs backend
+
+
+Save PM2 process:
+
+pm2 save
+
+
+========================================================
+ENABLE PM2 AUTO START AFTER SERVER RESTART
+========================================================
+
+Run:
+
+pm2 startup
+
+
+PM2 gives another command.
+
+COPY and RUN that command.
+
+
+Example:
+
+sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u azureuser --hp /home/azureuser
+
+
+After running the above command, run again:
+
+pm2 save
+
+
+========================================================
+VERIFY BACKEND
+========================================================
+
+Run:
+
+pm2 status
+
+
+You should see:
+
+backend    online
+
+
+========================================================
+STEP 8 — FRONTEND SETUP
+========================================================
+
+Go to frontend folder:
+
+cd ../frontend
+
+
+Install dependencies:
+
+npm install
+
+
+========================================================
+OPEN FRONTEND .ENV FILE
+========================================================
+
+Open env file:
+
+nano .env
+
+
+Change this:
+
+VITE_API_URL=https://student-managemnt-backend-cubwh0edc4eta2a0.eastasia-01.azurewebsites.net
+
+
+To this:
+
+VITE_API_URL=http://YOUR_VM_IP
+
+
+Example:
+
+VITE_API_URL=http://20.244.10.100
+
+
+IMPORTANT:
+DO NOT ADD PORT NUMBER like :5000
+
+
+Correct:
+
+http://20.244.10.100
+
+
+Wrong:
+
+http://20.244.10.100:5000
+
+
+Save and Exit:
+
+CTRL + X
+Press Y
+Press ENTER
+
+
+========================================================
+TEST FRONTEND
+========================================================
+
+Run:
+
+npm run dev
+
+
+If the frontend works correctly, stop it:
+
+CTRL + C
+
+
+========================================================
+BUILD FRONTEND
+========================================================
+
+Run:
+
+npm run build
+
+
+========================================================
+VERIFY BUILD
+========================================================
+
+Run:
+
+ls dist
+
+
+You must see:
+
+index.html
+
+
+========================================================
+STEP 9 — FIX FILE PERMISSIONS
+========================================================
+
+Run:
+
+sudo chmod 755 /home/azureuser
+
+
+Replace project_folder_name with your project folder name:
+
+sudo chmod -R 755 /home/azureuser/project_folder_name/frontend/dist
+
+
+Example:
+
+sudo chmod -R 755 /home/azureuser/Student-management/frontend/dist
+
+
+Optional test:
+
+sudo -u www-data cat /home/azureuser/project_folder_name/frontend/dist/index.html
+
+
+Example:
+
+sudo -u www-data cat /home/azureuser/Student-management/frontend/dist/index.html
+
+
+========================================================
+STEP 10 — CONFIGURE NGINX
+========================================================
+
+Create nginx config file:
+
+sudo nano /etc/nginx/sites-available/project_name
+
+
+Example:
+
+sudo nano /etc/nginx/sites-available/Student-management
+
+
+Paste this:
+
+server {
+    listen 80;
+
+    server_name YOUR_VM_IP;
+
+    root /home/azureuser/project_folder_name/frontend/dist;
+
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api {
+        proxy_pass http://localhost:5000;
+
+        proxy_http_version 1.1;
+
+        proxy_set_header Upgrade $http_upgrade;
+
+        proxy_set_header Connection 'upgrade';
+
+        proxy_set_header Host $host;
+
+        proxy_set_header X-Real-IP $remote_addr;
+
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+
+IMPORTANT:
+
+Replace:
+
+YOUR_VM_IP
+
+
+Example:
+
+server_name 20.244.10.100;
+
+
+Replace:
+
+project_folder_name
+
+
+Example:
+
+root /home/azureuser/Student-management/frontend/dist;
+
+
+Save and Exit:
+
+CTRL + X
+Press Y
+Press ENTER
+
+
+========================================================
+STEP 11 — ENABLE NGINX CONFIG
+========================================================
+
+Remove default nginx config:
+
+sudo rm -f /etc/nginx/sites-enabled/default
+
+
+Enable your project:
+
+sudo ln -s /etc/nginx/sites-available/project_name /etc/nginx/sites-enabled/
+
+
+Example:
+
+sudo ln -s /etc/nginx/sites-available/Student-management /etc/nginx/sites-enabled/
+
+
+Important:
+
+Use the command exactly as shown in the example.
+Only change the project name if needed.
+
+
+========================================================
+STEP 12 — TEST NGINX
+========================================================
+
+Run:
+
+sudo nginx -t
+
+
+If successful you will see:
+
+syntax is ok
+test is successful
+
+
+If nginx test fails:
+
+Check the config file carefully.
+
+Most common mistakes:
+- Missing semicolon ;
+- Wrong project folder path
+- Wrong server_name IP
+
+
+========================================================
+STEP 13 — RESTART NGINX
+========================================================
+
+Restart nginx:
+
+sudo systemctl restart nginx
+
+
+Reload nginx:
+
+sudo systemctl reload nginx
+
+
+Enable auto start:
+
+sudo systemctl enable nginx
+
+
+Check nginx status:
+
+sudo systemctl status nginx
+
+
+========================================================
+STEP 14 — OPEN WEBSITE
+========================================================
+
+Open browser:
+
+http://YOUR_VM_IP
+
+
+Example:
+
+http://20.244.10.100
+
+
+
+
+
+
+
+
+
+
+
+========================================================
+DEPLOYMENT COMPLETED
+========================================================
+
+
+
+
+
+
+========================================================
+USEFUL PM2 COMMANDS
+========================================================
+
+Check running apps:
+
+pm2 status
+
+
+View logs:
+
+pm2 logs
+
+OR
+
+pm2 logs backend
+
+
+Restart backend:
+
+pm2 restart backend
+
+
+Stop backend:
+
+pm2 stop backend
+
+
+Delete backend:
+
+pm2 delete backend
+
+
+========================================================
+USEFUL NGINX COMMANDS
+========================================================
+
+Restart nginx:
+
+sudo systemctl restart nginx
+
+
+Reload nginx:
+
+sudo systemctl reload nginx
+
+
+Check status:
+
+sudo systemctl status nginx
+
+
+Test config:
+
+sudo nginx -t
+
+
+========================================================
+IF WEBSITE NOT WORKING
+========================================================
+
+1. Check backend:
+
+pm2 status
+
+
+2. Check backend logs:
+
+pm2 logs
+
+
+3. Check nginx config:
+
+sudo nginx -t
+
+
+4. Restart nginx:
+
+sudo systemctl restart nginx
+
+
+5. Verify inbound rules:
+
+Port 80 must be open
+
+
+6. Verify frontend build exists:
+
+cd ~/project_folder_name/frontend
+
+
+Example:
+
+cd ~/Student-management/frontend
+
+
+Run:
+
+ls dist
+
+
+7. Verify backend port running:
+
+sudo lsof -i :5000
+
+
+========================================================
+DEPLOYMENT COMPLETED
+========================================================
